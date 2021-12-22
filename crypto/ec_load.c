@@ -7,7 +7,7 @@
  **/
 EC_KEY *ec_load(char const *folder)
 {
-	EC_KEY *key;
+	EC_KEY *key = NULL;
 	FILE *fp;
 	struct stat sb;
 	char file[512] = {0};
@@ -17,7 +17,7 @@ EC_KEY *ec_load(char const *folder)
 	if (stat(folder, &sb) == -1)
 		return (NULL);
 
-	sprintf(file, "%s/%s", folder, PRI_FILENAME);
+	sprintf(file, "./%s/%s", folder, PRI_FILENAME);
 	fp = fopen(file, "r");
 	if (!fp)
 		return (NULL);
@@ -25,7 +25,7 @@ EC_KEY *ec_load(char const *folder)
 		return (NULL);
 	fclose(fp);
 
-	sprintf(file, "%s/%s", folder, PUB_FILENAME);
+	sprintf(file, "./%s/%s", folder, PUB_FILENAME);
 	fp = fopen(file, "r");
 	if (!fp)
 		return (NULL);

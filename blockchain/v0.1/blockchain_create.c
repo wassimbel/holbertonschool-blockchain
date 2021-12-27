@@ -7,7 +7,7 @@
 
 block_t *genesis_block(void)
 {
-	block_t *genesis = malloc(sizeof(*genesis));
+	block_t *genesis = calloc(1, sizeof(*genesis));
 
 	if (!genesis)
 		return (NULL);
@@ -36,7 +36,7 @@ blockchain_t *blockchain_create(void)
 	blockchain_t *blockchain = NULL;
 	block_t *genesis = NULL;
 
-	blockchain = malloc(sizeof(*blockchain));
+	blockchain = calloc(1, sizeof(*blockchain));
 	if (!blockchain)
 		return (NULL);
 	genesis = genesis_block();

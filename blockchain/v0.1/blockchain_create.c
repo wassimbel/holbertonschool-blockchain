@@ -33,8 +33,8 @@ block_t *genesis_block(void)
 
 blockchain_t *blockchain_create(void)
 {
-	blockchain_t *blockchain;
-	block_t *genesis;
+	blockchain_t *blockchain = NULL;
+	block_t *genesis = NULL;
 
 	blockchain = malloc(sizeof(*blockchain));
 	if (!blockchain)

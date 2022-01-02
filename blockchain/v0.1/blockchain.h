@@ -77,6 +77,13 @@ typedef struct block_s
 	uint8_t     hash[SHA256_DIGEST_LENGTH];
 } block_t;
 
+typedef struct header_s
+{
+	uint8_t hblk_magic[4];
+	uint8_t hblk_version[3];
+	uint8_t hblk_endian;
+	int32_t hblk_blocks;
+} header_t;
 
 blockchain_t *blockchain_create(void);
 block_t *block_create(block_t const *prev, int8_t const *data,
@@ -85,4 +92,5 @@ void block_destroy(block_t *block);
 void blockchain_destroy(blockchain_t *blockchain);
 uint8_t *block_hash(block_t const *block,
 			uint8_t hash_buf[SHA256_DIGEST_LENGTH]);
+int blockchain_serialize(blockchain_t const *blockchain, char const *path);
 #endif /* _BLOCKCHAIN_H_ */

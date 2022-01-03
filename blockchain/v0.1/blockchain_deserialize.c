@@ -1,6 +1,45 @@
 #include "blockchain.h"
 
 /**
+ * swap_endian - swap endianness
+ * @block: address of the block
+ **/
+
+void swap_endian(block_t *block)
+{
+	_swap_endian((void *)&block->info.index,
+				sizeof(block->info.index));
+	_swap_endian((void *)&block->info.difficulty,
+				sizeof(block->info.difficulty));
+	_swap_endian((void *)&block->info.timestamp,
+				sizeof(block->info.timestamp));
+	_swap_endian((void *)&block->info.nonce,
+				sizeof(block->info.nonce));
+	_swap_endian((void *)&block->data.len,
+				sizeof(block->data.len));
+}
+/**
+ * read_block - reads a block from a file to struct
+ * @block: address of the block to read in
+ * @blockchain: address of the blockchain
+ * @fp: file descriptor
+ * Return: retruns 0 on success otherwise -1
+ **/
+int read_block(block_t *block, blockchain_t *blockchain, FILE *fp)
+{
+	if (!block)
+	{
+		blockchain_destroy(blockchain);
+		fclose(fp);
+		return (-1);
+	}
+	fread(&block->info, sizeof(block->info), 1, fp);
+	fread(&block->data.len, sizeof(block->data.len), 1, fp);
+	fread(&block->data, sizeof(block->data), 1, fp);
+	fread(&block->hash, sizeof(block->hash), 1, fp);
+	return (0);
+}
+/**
  * blockchain_deserialize - deserializes a Blockchain from a file
  * @path: contains the path to a file to load the Blockchain from
  * Return: returns a pointer to the deserialized Blockchain upon success,
@@ -39,29 +78,11 @@ blockchain_t *blockchain_deserialize(char const *path)
 	for (i = 0; i < header.hblk_blocks - 1; i++)
 	{
 		block = malloc(sizeof(*block));
-		if (!block)
-		{
-			blockchain_destroy(blockchain);
-			fclose(fp);
+		if (read_block(block, blockchain, fp) == -1)
 			return (NULL);
-		}
-		fread(&block->info, sizeof(block->info), 1, fp);
-		fread(&block->data.len, sizeof(block->data.len), 1, fp);
-		fread(&block->data, sizeof(block->data), 1, fp);
-		fread(&block->hash, sizeof(block->hash), 1, fp);
+
 		if (endianness != header.hblk_endian)
-		{
-			_swap_endian((void *)&block->info.index,
-					sizeof(block->info.index));
-			_swap_endian((void *)&block->info.difficulty,
-					sizeof(block->info.difficulty));
-			_swap_endian((void *)&block->info.timestamp,
-					sizeof(block->info.timestamp));
-			_swap_endian((void *)&block->info.nonce,
-					sizeof(block->info.nonce));
-			_swap_endian((void *)&block->data.len,
-					sizeof(block->data.len));
-		}
+			swap_endian(block);
 		*(block->data.buffer + block->data.len) = '\0';
 		llist_add_node(blockchain->chain, block, ADD_NODE_REAR);
 	}

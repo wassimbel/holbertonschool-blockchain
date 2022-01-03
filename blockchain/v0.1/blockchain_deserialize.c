@@ -15,8 +15,6 @@ void swap_endian(block_t *block)
 				sizeof(block->info.timestamp));
 	_swap_endian((void *)&block->info.nonce,
 				sizeof(block->info.nonce));
-	_swap_endian((void *)&block->data.len,
-				sizeof(block->data.len));
 }
 /**
  * read_block - reads a block from a file to struct
@@ -31,9 +29,10 @@ int read_block(blockchain_t *blockchain, FILE *fp,
 {
 	block_t *block;
 	long int genesis;
+	uint32_t len;
 	int i;
 
-	genesis = sizeof(block->info) + sizeof(block->hash) + 20;
+	genesis = sizeof(block->info) + sizeof(block->hash) + 20L;
 	fseek(fp, genesis, SEEK_CUR);
 	for (i = 0; i < size - 1; i++)
 	{
@@ -41,17 +40,17 @@ int read_block(blockchain_t *blockchain, FILE *fp,
 		if (!block)
 			return (-1);
 		fread(&block->info, sizeof(block->info), 1, fp);
-		fread(&block->data.len, sizeof(block->data.len), 1, fp);
-		fread(&block->data, sizeof(block->data), 1, fp);
-		fread(&block->hash, sizeof(block->hash), 1, fp);
-
+		fread(&len, sizeof(len), 1, fp);
+		if (endianness)
+			_swap_endian(&len, sizeof(len));
+		fread(&block->data.buffer, len, 1, fp);
+		fread(&block->hash, SHA256_DIGEST_LENGTH, 1, fp);
+		block->data.len = len;
 		if (endianness)
 			swap_endian(block);
-
-		*(block->data.buffer + block->data.len) = '\0';
 		llist_add_node(blockchain->chain, block, ADD_NODE_REAR);
 	}
-		return (0);
+	return (0);
 }
 /**
  * blockchain_deserialize - deserializes a Blockchain from a file
@@ -70,22 +69,25 @@ blockchain_t *blockchain_deserialize(char const *path)
 	if (!path)
 		return (NULL);
 
+	if (access(path, R_OK) == -1)
+		return (NULL);
 
 	fp = fopen(path, "r");
+
 	if (!fp)
 		return (NULL);
+
 	fread(&header, sizeof(header), 1, fp);
-	endianness = _get_endianness() != header.hblk_endian;
-	if (endianness)
-		_swap_endian(&header.hblk_blocks,
-				sizeof(header.hblk_blocks));
 	blockchain = blockchain_create();
 	if (!blockchain)
 	{
 		fclose(fp);
 		return (NULL);
 	}
+	endianness = _get_endianness() != header.hblk_endian;
 	size = header.hblk_blocks;
+	if (endianness)
+		_swap_endian(&size, sizeof(size));
 	if (read_block(blockchain, fp, endianness, size) == -1)
 	{
 		blockchain_destroy(blockchain);

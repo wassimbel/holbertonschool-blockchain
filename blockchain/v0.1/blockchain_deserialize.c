@@ -78,6 +78,12 @@ blockchain_t *blockchain_deserialize(char const *path)
 		return (NULL);
 
 	fread(&header, sizeof(header), 1, fp);
+	if (memcmp(header.hblk_magic, "HBLK", 4) ||
+			memcmp(header.hblk_version, "0.1", 3))
+	{
+		fclose(fp);
+		return (NULL);
+	}
 	blockchain = blockchain_create();
 	if (!blockchain)
 	{

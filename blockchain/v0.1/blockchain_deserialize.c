@@ -20,24 +20,38 @@ void swap_endian(block_t *block)
 }
 /**
  * read_block - reads a block from a file to struct
- * @block: address of the block to read in
  * @blockchain: address of the blockchain
  * @fp: file descriptor
+ * @endianness: endianness
+ * @size: nunber of blocks
  * Return: retruns 0 on success otherwise -1
  **/
-int read_block(block_t *block, blockchain_t *blockchain, FILE *fp)
+int read_block(blockchain_t *blockchain, FILE *fp,
+			uint8_t endianness, int size)
 {
-	if (!block)
+	block_t *block;
+	long int genesis;
+	int i;
+
+	genesis = sizeof(block->info) + sizeof(block->hash) + 20;
+	fseek(fp, genesis, SEEK_CUR);
+	for (i = 0; i < size - 1; i++)
 	{
-		blockchain_destroy(blockchain);
-		fclose(fp);
-		return (-1);
+		block = malloc(sizeof(*block));
+		if (!block)
+			return (-1);
+		fread(&block->info, sizeof(block->info), 1, fp);
+		fread(&block->data.len, sizeof(block->data.len), 1, fp);
+		fread(&block->data, sizeof(block->data), 1, fp);
+		fread(&block->hash, sizeof(block->hash), 1, fp);
+
+		if (endianness)
+			swap_endian(block);
+
+		*(block->data.buffer + block->data.len) = '\0';
+		llist_add_node(blockchain->chain, block, ADD_NODE_REAR);
 	}
-	fread(&block->info, sizeof(block->info), 1, fp);
-	fread(&block->data.len, sizeof(block->data.len), 1, fp);
-	fread(&block->data, sizeof(block->data), 1, fp);
-	fread(&block->hash, sizeof(block->hash), 1, fp);
-	return (0);
+		return (0);
 }
 /**
  * blockchain_deserialize - deserializes a Blockchain from a file
@@ -49,22 +63,20 @@ blockchain_t *blockchain_deserialize(char const *path)
 {
 	FILE *fp;
 	blockchain_t *blockchain;
-	block_t *block;
 	header_t header;
-	size_t genesis;
-	int i;
+	int size;
 	uint8_t endianness;
 
 	if (!path)
 		return (NULL);
 
-	endianness = _get_endianness();
 
 	fp = fopen(path, "r");
 	if (!fp)
 		return (NULL);
 	fread(&header, sizeof(header), 1, fp);
-	if (endianness != header.hblk_endian)
+	endianness = _get_endianness() != header.hblk_endian;
+	if (endianness)
 		_swap_endian(&header.hblk_blocks,
 				sizeof(header.hblk_blocks));
 	blockchain = blockchain_create();
@@ -73,18 +85,12 @@ blockchain_t *blockchain_deserialize(char const *path)
 		fclose(fp);
 		return (NULL);
 	}
-	genesis = sizeof(block->info) + sizeof(block->hash) + 20;
-	fseek(fp, genesis, SEEK_CUR);
-	for (i = 0; i < header.hblk_blocks - 1; i++)
+	size = header.hblk_blocks;
+	if (read_block(blockchain, fp, endianness, size) == -1)
 	{
-		block = malloc(sizeof(*block));
-		if (read_block(block, blockchain, fp) == -1)
-			return (NULL);
-
-		if (endianness != header.hblk_endian)
-			swap_endian(block);
-		*(block->data.buffer + block->data.len) = '\0';
-		llist_add_node(blockchain->chain, block, ADD_NODE_REAR);
+		blockchain_destroy(blockchain);
+		fclose(fp);
+		return (NULL);
 	}
 	fclose(fp);
 	return (blockchain);

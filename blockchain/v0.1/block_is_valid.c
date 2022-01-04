@@ -23,8 +23,8 @@ int block_is_valid(block_t const *block, block_t const *prev_block)
 		memcmp(prev_block->hash, prev_hash, SHA256_DIGEST_LENGTH))
 		return (-1);
 	if (!block_hash(block, block_hash256) ||
-		memcmp(block->hash, block_hash256, SHA256_DIGEST_LENGTH ||
-		memcmp(block->info.prev_hash, prev_hash, SHA256_DIGEST_LENGTH)))
+		memcmp(block->hash, block_hash256, SHA256_DIGEST_LENGTH) ||
+		memcmp(block->info.prev_hash, prev_hash, SHA256_DIGEST_LENGTH))
 		return (-1);
 	if (block->data.len > BLOCKCHAIN_DATA_MAX)
 		return (-1);

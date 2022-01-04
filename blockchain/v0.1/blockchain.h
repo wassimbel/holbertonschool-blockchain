@@ -77,6 +77,14 @@ typedef struct block_s
 	uint8_t     hash[SHA256_DIGEST_LENGTH];
 } block_t;
 
+/**
+ * struct header_s - file header
+ * @hblk_magic: magic number
+ * @hblk_version: version
+ * @hblk_endian: endianness
+ * @hblk_blocks: number of blocks
+**/
+
 typedef struct header_s
 {
 	uint8_t hblk_magic[4];
@@ -84,6 +92,22 @@ typedef struct header_s
 	uint8_t hblk_endian;
 	int32_t hblk_blocks;
 } header_t;
+
+#define GENESIS { \
+		{ /* info */	    \
+			0 /* index */,				\
+				0, /* difficulty */		\
+				1537578000, /* timestamp */	\
+				0, /* nonce */			\
+				{0} /* prev_hash */		\
+		},						\
+		{ /* data */					\
+			"Holberton School", /* buffer */	\
+				16 /* len */			\
+				},				\
+		"\xc5\x2c\x26\xc8\xb5\x46\x16\x39\x63\x5d\x8e\xdf\x2a\x97\xd4\x8d" \
+		"\x0c\x8e\x00\x09\xc8\x17\xf2\xb1\xd3\xd7\xff\x2f\x04\x51\x58\x03" \
+		}
 
 blockchain_t *blockchain_create(void);
 block_t *block_create(block_t const *prev, int8_t const *data,
@@ -94,4 +118,5 @@ uint8_t *block_hash(block_t const *block,
 			uint8_t hash_buf[SHA256_DIGEST_LENGTH]);
 int blockchain_serialize(blockchain_t const *blockchain, char const *path);
 blockchain_t *blockchain_deserialize(char const *path);
+int block_is_valid(block_t const *block, block_t const *prev_block);
 #endif /* _BLOCKCHAIN_H_ */

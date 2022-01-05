@@ -21,14 +21,14 @@ int hash_matches_difficulty(uint8_t const hash[SHA256_DIGEST_LENGTH],
 		{
 			if ((*p >> i) & 1)
 			{
-				if (diff == difficulty)
+				if (diff >= difficulty)
 					return (1);
 				return (0);
 			}
 			diff++;
 		}
 	}
-	if (diff != difficulty)
+	if (diff < difficulty)
 		return (0);
 	return (1);
 }

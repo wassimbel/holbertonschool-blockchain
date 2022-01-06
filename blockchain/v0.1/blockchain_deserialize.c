@@ -45,9 +45,10 @@ int read_block(blockchain_t *blockchain, FILE *fp,
 			_swap_endian(&len, sizeof(len));
 		fread(&block->data.buffer, len, 1, fp);
 		fread(&block->hash, SHA256_DIGEST_LENGTH, 1, fp);
-		block->data.len = len;
 		if (endianness)
 			swap_endian(block);
+		block->data.len = len;
+		*(block->data.buffer + len) = '\0';
 		llist_add_node(blockchain->chain, block, ADD_NODE_REAR);
 	}
 	return (0);

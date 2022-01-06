@@ -33,7 +33,7 @@ uint32_t blockchain_difficulty(blockchain_t const *blockchain)
 	if (tail->info.index % DIFFICULTY_ADJUSTMENT_INTERVAL == 0 &&
 						tail->info.index != 0)
 	{
-		if (elapsed < expected / 2)
+		if (elapsed * 2 < expected)
 			tail->info.difficulty++;
 		else if (elapsed > expected * 2)
 			tail->info.difficulty--;

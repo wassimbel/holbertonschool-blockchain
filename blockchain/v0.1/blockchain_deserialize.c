@@ -40,10 +40,10 @@ int read_block(blockchain_t *blockchain, FILE *fp,
 		if (!block)
 			return (-1);
 		fread(&block->info, sizeof(block->info), 1, fp);
-		fread(&len, sizeof(len), 1, fp);
+		fread(&len, sizeof(len) + 1, 1, fp);
 		if (endianness)
 			_swap_endian(&len, sizeof(len));
-		fread(&block->data.buffer, len + 1, 1, fp);
+		fread(&block->data.buffer, len, 1, fp);
 		fread(&block->hash, SHA256_DIGEST_LENGTH, 1, fp);
 		if (endianness)
 			swap_endian(block);

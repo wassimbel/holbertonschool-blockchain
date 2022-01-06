@@ -40,7 +40,7 @@ int read_block(blockchain_t *blockchain, FILE *fp,
 		if (!block)
 			return (-1);
 		fread(&block->info, sizeof(block->info), 1, fp);
-		fread(&len, sizeof(len) + 1, 1, fp);
+		fread(&len, sizeof(len), 1, fp);
 		if (endianness)
 			_swap_endian(&len, sizeof(len));
 		fread(&block->data.buffer, len, 1, fp);
@@ -48,6 +48,7 @@ int read_block(blockchain_t *blockchain, FILE *fp,
 		if (endianness)
 			swap_endian(block);
 		block->data.len = len;
+		*(block->data.buffer + len) = '\0';
 		llist_add_node(blockchain->chain, block, ADD_NODE_REAR);
 	}
 	return (0);

@@ -1,1 +1,1 @@
-#Blockchain - Data structures
+#Blockchain - Block mining

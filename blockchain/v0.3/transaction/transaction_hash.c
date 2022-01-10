@@ -11,7 +11,7 @@
 int input_buffer(llist_node_t node, unsigned int idx, void *arg)
 {
 
-	memcpy((uint8_t *)arg + idx * SHA256_DIGEST_LENGTH * 3, node,
+	memcpy((int8_t *)arg + idx * SHA256_DIGEST_LENGTH * 3, node,
 						SHA256_DIGEST_LENGTH * 3);
 	return (0);
 }
@@ -27,7 +27,7 @@ int input_buffer(llist_node_t node, unsigned int idx, void *arg)
 int output_buffer(llist_node_t node, unsigned int idx, void *arg)
 {
 
-	memcpy((uint8_t *)arg + idx * SHA256_DIGEST_LENGTH,
+	memcpy((int8_t *)arg + idx * SHA256_DIGEST_LENGTH,
 			((tx_out_t *)node)->hash, SHA256_DIGEST_LENGTH);
 	return (0);
 }
@@ -50,11 +50,7 @@ uint8_t *transaction_hash(transaction_t const *transaction,
 		return (NULL);
 
 	tx_input_size = llist_size(transaction->inputs);
-	if (!tx_input_size)
-		return (NULL);
 	tx_output_size = llist_size(transaction->outputs);
-	if (!tx_output_size)
-		return (NULL);
 	len = SHA256_DIGEST_LENGTH * (tx_input_size * 3) +
 				SHA256_DIGEST_LENGTH * tx_output_size;
 	buff = calloc(1, len);

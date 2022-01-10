@@ -58,7 +58,7 @@ uint8_t *transaction_hash(transaction_t const *transaction,
 		return (NULL);
 	llist_for_each(transaction->inputs, input_buffer, buff);
 	llist_for_each(transaction->outputs, output_buffer,
-					buff + SHA256_DIGEST_LENGTH * 3);
+					buff + SHA256_DIGEST_LENGTH * 3 * tx_input_size);
 	if (!sha256(buff, len, hash_buf))
 	{
 		free(buff);

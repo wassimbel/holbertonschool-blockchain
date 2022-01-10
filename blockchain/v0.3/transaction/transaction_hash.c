@@ -51,10 +51,11 @@ uint8_t *transaction_hash(transaction_t const *transaction,
 
 	tx_input_size = llist_size(transaction->inputs);
 	tx_output_size = llist_size(transaction->outputs);
-	len = SHA256_DIGEST_LENGTH * (tx_input_size * 3) +
+	len = SHA256_DIGEST_LENGTH * 3 * tx_input_size +
 				SHA256_DIGEST_LENGTH * tx_output_size;
 	buff = calloc(1, len);
-
+	if (!buff)
+		return (NULL);
 	llist_for_each(transaction->inputs, input_buffer, buff);
 	llist_for_each(transaction->outputs, output_buffer,
 					buff + SHA256_DIGEST_LENGTH * 3);
@@ -64,5 +65,4 @@ uint8_t *transaction_hash(transaction_t const *transaction,
 		return (NULL);
 	}
 	return (hash_buf);
-
 }

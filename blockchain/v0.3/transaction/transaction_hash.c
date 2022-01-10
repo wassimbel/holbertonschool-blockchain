@@ -64,5 +64,6 @@ uint8_t *transaction_hash(transaction_t const *transaction,
 		free(buff);
 		return (NULL);
 	}
+	free(buff);
 	return (hash_buf);
 }

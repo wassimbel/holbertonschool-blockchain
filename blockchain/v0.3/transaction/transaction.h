@@ -82,4 +82,5 @@ uint8_t *transaction_hash(transaction_t const *transaction,
 sig_t *tx_in_sign(tx_in_t *in, uint8_t const tx_id[SHA256_DIGEST_LENGTH],
 				EC_KEY const *sender, llist_t *all_unspent);
 
+void transaction_destroy(transaction_t *transaction);
 #endif /* _TRANSACTION_H_ */

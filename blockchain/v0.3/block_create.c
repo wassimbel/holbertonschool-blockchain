@@ -23,6 +23,12 @@ block_t *block_create(block_t const *prev, int8_t const *data,
 	if (!block)
 		return (NULL);
 
+	block->transactions = llist_create(MT_SUPPORT_FALSE);
+	if (!block->transactions)
+	{
+		free(block);
+		return (NULL);
+	}
 	block->info.index = prev->info.index + 1;
 	block->info.difficulty = 0;
 	block->info.timestamp = (uint64_t)time(NULL);

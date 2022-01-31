@@ -58,5 +58,6 @@ blockchain_t *blockchain_create(void)
 		free(blockchain), free(genesis);
 		return (NULL);
 	}
+	blockchain->unspent = llist_create(MT_SUPPORT_TRUE);
 	return (blockchain);
 }
